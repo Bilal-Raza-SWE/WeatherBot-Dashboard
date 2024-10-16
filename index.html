@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherBot - Dashboard</title>
+  <link rel="stylesheet" href="Dashboard-style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo">Weather App</div>
+      <nav>
+        <ul>
+          <li><a href="#" class="active">Dashboard</a></li>
+          <li><a href="table.html">Tables</a></li>
+        </ul>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <header>
+        <div class="search-bar">
+          <input type="text" id="city-input" placeholder="Search for a city...">
+          <button type="button" id="search-button">Search</button>
+        </div>
+        <div class="user-profile">
+          <img src="https://placehold.co/60" alt="User Profile" class="profile-img">
+        </div>
+      </header>
+      <section class="weather-data">
+        <h2>Weather Data Based on City</h2>
+        <div id="current-weather">
+          <!-- Current weather data will be inserted here -->
+        </div>
+      </section>
+      <section class="charts">
+        <div class="chart" id="vertical-bar-chart">
+          <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart" id="doughnut-chart">
+          <canvas id="doughnutChart"></canvas>
+        </div>
+        <div class="chart" id="line-chart">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="Weather.js"></script>
+</body>
+
+</html>
