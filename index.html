@@ -7,6 +7,7 @@
   <title>WeatherBot - Dashboard</title>
   <link rel="stylesheet" href="Dashboard-style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 
 <body>
@@ -30,9 +31,9 @@
           <img src="https://placehold.co/60" alt="User Profile" class="profile-img">
         </div>
       </header>
-      <section class="weather-data">
+      <section class="weather-data" id="weather-widget">
         <h2>Weather Data Based on City</h2>
-        <div id="current-weather">
+        <div id="current-weather" hidden>
           <!-- Current weather data will be inserted here -->
         </div>
       </section>
