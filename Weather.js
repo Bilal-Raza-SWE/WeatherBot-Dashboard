@@ -1,11 +1,13 @@
 $(document).ready(function () {
   const apiKey = "76ce68845a2e4cfb0d47d6a81c8f7e11";
 
+  let barChartInstance, doughnutChartInstance, lineChartInstance;
+
   // Search button click event
   function SearchButton() {
     const city = $("#city-input").val().toLowerCase().trim();
     if (city) {
-      fetchWeatherData(city);  // Fetch current weather data
+      fetchWeatherData(city); // Fetch current weather data
       fetchForecastData(city); // Fetch 5-day forecast data
     } else {
       alert("Please enter a city name");
@@ -15,7 +17,7 @@ $(document).ready(function () {
   $("#search-button").on("click", SearchButton);
 
   $("#city-input").on("keypress", function (e) {
-    if (e.which === 13) { 
+    if (e.which === 13) {
       SearchButton();
     }
   });
@@ -23,7 +25,7 @@ $(document).ready(function () {
   // Fetch current weather data from OpenWeather API
   function fetchWeatherData(city) {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
-    
+
     $.get(url, function (data) {
       displayCurrentWeather(data);
     }).fail(function () {
@@ -32,9 +34,9 @@ $(document).ready(function () {
   }
 
   // Display current weather data in the dashboard
-function displayCurrentWeather(data) {
-  const { name, weather, main, wind } = data;
-  const weatherHtml = `
+  function displayCurrentWeather(data) {
+    const { name, weather, main, wind } = data;
+    const weatherHtml = `
     <h3>${name}</h3>
     <p><strong>Condition:</strong> ${weather[0].description}</p>
     <p><strong>Temperature:</strong> <span id="temperature">${main.temp}°C</span> 
@@ -43,25 +45,24 @@ function displayCurrentWeather(data) {
     <p><strong>Wind Speed:</strong> ${wind.speed} m/s</p>
     <img src="http://openweathermap.org/img/wn/${weather[0].icon}@2x.png" alt="Weather Icon">
   `;
-  $("#current-weather").show();
-  $("#current-weather").html(weatherHtml);
+    $("#current-weather").show();
+    $("#current-weather").html(weatherHtml);
 
-  // Toggle temperature unit on button click
-  $("#toggle-temp").on("click", function () {
-    const tempCelsius = main.temp;
-    const tempFahrenheit = (tempCelsius * 9/5) + 32;
-    const currentUnit = $("#temperature").text().includes("°C") ? "C" : "F";
+    // Toggle temperature unit on button click
+    $("#toggle-temp").on("click", function () {
+      const tempCelsius = main.temp;
+      const tempFahrenheit = (tempCelsius * 9) / 5 + 32;
+      const currentUnit = $("#temperature").text().includes("°C") ? "C" : "F";
 
-    if (currentUnit === "C") {
-      $("#temperature").text(`${tempFahrenheit.toFixed(1)}°F`);
-      $(this).text("Toggle °C");
-    } else {
-      $("#temperature").text(`${tempCelsius}°C`);
-      $(this).text("Toggle °F");
-    }
-  });
-}
-
+      if (currentUnit === "C") {
+        $("#temperature").text(`${tempFahrenheit.toFixed(1)}°F`);
+        $(this).text("Toggle °C");
+      } else {
+        $("#temperature").text(`${tempCelsius}°C`);
+        $(this).text("Toggle °F");
+      }
+    });
+  }
 
   // Fetch 5-day forecast data
   function fetchForecastData(city) {
@@ -79,17 +80,17 @@ function displayCurrentWeather(data) {
     const dailyTemps = [];
     const weatherConditions = {};
     const labels = [];
-    
+  
     // Extract data for the next 5 days
     forecastData.list.forEach((item, index) => {
       if (index % 8 === 0) { // Every 8th item represents a new day
         const temp = item.main.temp;
         const weatherDesc = item.weather[0].main;
         const date = new Date(item.dt * 1000).toLocaleDateString();
-        
+  
         dailyTemps.push(temp);
         labels.push(date);
-
+  
         if (weatherConditions[weatherDesc]) {
           weatherConditions[weatherDesc]++;
         } else {
@@ -97,10 +98,15 @@ function displayCurrentWeather(data) {
         }
       }
     });
-
+  
+    // Destroy previous chart instances if they exist
+    if (barChartInstance) barChartInstance.destroy();
+    if (doughnutChartInstance) doughnutChartInstance.destroy();
+    if (lineChartInstance) lineChartInstance.destroy();
+  
     // Bar Chart: Temperatures for the next 5 days
     const barCtx = $("#barChart")[0].getContext("2d");
-    new Chart(barCtx, {
+    barChartInstance = new Chart(barCtx, {
       type: "bar",
       data: {
         labels: labels,
@@ -111,10 +117,10 @@ function displayCurrentWeather(data) {
         }]
       }
     });
-
+  
     // Doughnut Chart: Percentage of different weather conditions
     const doughnutCtx = $("#doughnutChart")[0].getContext("2d");
-    new Chart(doughnutCtx, {
+    doughnutChartInstance = new Chart(doughnutCtx, {
       type: "doughnut",
       data: {
         labels: Object.keys(weatherConditions),
@@ -124,10 +130,10 @@ function displayCurrentWeather(data) {
         }]
       }
     });
-
+  
     // Line Chart: Temperature changes over the next 5 days
     const lineCtx = $("#lineChart")[0].getContext("2d");
-    new Chart(lineCtx, {
+    lineChartInstance = new Chart(lineCtx, {
       type: "line",
       data: {
         labels: labels,
@@ -140,5 +146,5 @@ function displayCurrentWeather(data) {
         }]
       }
     });
-  }
+  }  
 });
