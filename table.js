@@ -1,0 +1,65 @@
+$(document).ready(function () {
+    const weatherData = JSON.parse(localStorage.getItem('weatherData'));
+
+    if (weatherData && weatherData.forecast) { // Check if forecast exists
+        const forecastList = weatherData.forecast; // Access forecast data
+        const city = weatherData.city;
+
+        const entriesPerPage = 10;
+        let currentPage = 1;
+
+        function renderTable(page) {
+            const startIndex = (page - 1) * entriesPerPage;
+            const endIndex = startIndex + entriesPerPage;
+            const paginatedData = forecastList.slice(startIndex, endIndex);
+
+            $('#forecast-table-body').empty(); // Clear old data
+
+            paginatedData.forEach(entry => {
+                const date = entry.dt_txt.split(' ')[0];
+                const time = entry.dt_txt.split(' ')[1].slice(0, 5); // Get time
+                const temp = entry.main.temp.toFixed(1);
+                const condition = entry.weather[0].description;
+                const humidity = entry.main.humidity;
+                const windSpeed = entry.wind.speed;
+
+                const tableRow = `
+                    <tr>
+                        <td class="date-column">${date}</td>
+                        <td class="time-column">${time}</td>
+                        <td class="city-column">${city}</td>
+                        <td class="temp-column">
+                            <span class="temperature-display">${temp}</span>
+                            <span class="temperature-unit">°C</span>
+                        </td>
+                        <td class="condition-column">${condition}</td>
+                        <td class="humidity-column">${humidity}</td>
+                        <td class="wind-column">${windSpeed} m/s</td>
+                    </tr>
+                `;
+
+                $('#forecast-table-body').append(tableRow);
+            });
+        }
+
+        // Initial render
+        renderTable(currentPage);
+
+        // Pagination logic
+        $('.btn-next').on('click', function () {
+            if (currentPage < Math.ceil(forecastList.length / entriesPerPage)) {
+                currentPage++;
+                renderTable(currentPage);
+            }
+        });
+
+        $('.btn-prev').on('click', function () {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable(currentPage);
+            }
+        });
+    } else {
+        console.error('No weather data found in localStorage or forecast is missing.');
+    }
+});
