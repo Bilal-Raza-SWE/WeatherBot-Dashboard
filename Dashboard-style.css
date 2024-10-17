@@ -145,7 +145,6 @@ header {
 }
 
 
-
 .charts {
   display: flex;
   justify-content: space-evenly;
@@ -162,6 +161,42 @@ header {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
+
+
+/* Charts gradient colors */
+.gradient-clear-sky {
+  background: linear-gradient(to right, #56CCF2, #2F80ED) !important;
+}
+
+.gradient-clouds {
+  background: linear-gradient(to right, #BBD2C5, #536976) !important;
+}
+
+.gradient-rain {
+  background: linear-gradient(to right, #ff75c3, #ffa647, #ffe83f, #9fff5b, #70e2ff, #cd93ff) !important;
+}
+
+.gradient-snow {
+  background: linear-gradient(to right, #ffffff, #e6e6e6) !important;
+}
+
+.gradient-thunderstorm {
+  background: linear-gradient(to right, #434343, #000000) !important;
+}
+
+.gradient-drizzle {
+  background: linear-gradient(to right, #F7941E, #004E8F) !important;
+}
+
+.gradient-mist {
+  background: linear-gradient(to right, #215f00, #e4e4d9) !important;
+}
+
+/* Optional: Add a smooth transition effect */
+.weather-widget {
+  transition: background 0.5s ease-in-out;
+}
+
 
 h2 {
   margin-top: 0;
