@@ -66,17 +66,16 @@ nav ul li a.active {
 /* === HEADER STYLING (Search Bar & User Profile) === */
 header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   margin-bottom: 20px;
-  padding-bottom: 10px;
   border-bottom: 1px solid #e0e0e0;
 }
 
 .search-bar {
   display: flex;
-  flex-grow: 1;
-  margin-right: 30px;
+  flex-grow: 0.5;
+  margin-right: 20px;
 }
 
 .search-bar input {
@@ -105,15 +104,15 @@ header {
 
 .user-profile {
   position: relative;
+  transform: translate(100px);
 }
 
 .user-profile img {
   border-radius: 50%;
-  border: 2px groove #dddddd;
+  border: 2px groove #DDDDDD;
   width: 60px;
   height: 60px;
 }
-
 /* === TABLE & CHATBOT SIDE-BY-SIDE LAYOUT (FOR NORMAL VIEW) === */
 .content-wrapper {
   display: grid;
@@ -271,6 +270,19 @@ th.wind-column,
   border-radius: 25px;
   cursor: pointer;
   transition: background-color 0.3s ease, box-shadow 0.2s ease;
+}
+
+
+.pagination .btn-prev.disabled,
+.pagination .btn-next.disabled {
+  background-color: #cccccc; /* Disabled button color */
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.pagination .btn-prev:hover:not(.disabled),
+.pagination .btn-next:hover:not(.disabled) {
+  background-color: #2980b9; /* Darker shade when hovered */
 }
 
 .btn-prev:hover,

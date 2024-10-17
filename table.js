@@ -1,8 +1,8 @@
 $(document).ready(function () {
     const weatherData = JSON.parse(localStorage.getItem('weatherData'));
 
-    if (weatherData && weatherData.forecast) { // Check if forecast exists
-        const forecastList = weatherData.forecast; // Access forecast data
+    if (weatherData) {
+        const forecastList = weatherData.forecast;
         const city = weatherData.city;
 
         const entriesPerPage = 10;
@@ -40,6 +40,25 @@ $(document).ready(function () {
 
                 $('#forecast-table-body').append(tableRow);
             });
+
+            // Update button states
+            updatePaginationButtons();
+        }
+
+        function updatePaginationButtons() {
+            const totalPages = Math.ceil(forecastList.length / entriesPerPage);
+
+            if (currentPage === 1) {
+                $('.btn-prev').addClass('disabled');
+            } else {
+                $('.btn-prev').removeClass('disabled');
+            }
+
+            if (currentPage === totalPages) {
+                $('.btn-next').addClass('disabled');
+            } else {
+                $('.btn-next').removeClass('disabled');
+            }
         }
 
         // Initial render
@@ -47,7 +66,8 @@ $(document).ready(function () {
 
         // Pagination logic
         $('.btn-next').on('click', function () {
-            if (currentPage < Math.ceil(forecastList.length / entriesPerPage)) {
+            const totalPages = Math.ceil(forecastList.length / entriesPerPage);
+            if (currentPage < totalPages) {
                 currentPage++;
                 renderTable(currentPage);
             }
@@ -59,7 +79,8 @@ $(document).ready(function () {
                 renderTable(currentPage);
             }
         });
-    } else {
+    }
+    else {
         console.error('No weather data found in localStorage or forecast is missing.');
     }
 });
