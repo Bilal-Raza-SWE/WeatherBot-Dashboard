@@ -23,51 +23,53 @@ $(document).ready(function () {
   });
 
   // Fetch current weather data from OpenWeather API
-  function fetchWeatherData(city) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+function fetchWeatherData(city) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
 
-    $.get(url, function (data) {
+  $.get(url, function (data) {
       displayCurrentWeather(data);
-    }).fail(function () {
-      alert("City not found or API error");
-    });
-  }
 
+      // Ensure to store the current weather as well
+      storeWeatherDataInLocalStorage(city, data);
+  }).fail(function () {
+      alert("City not found or API error");
+  });
+}
   // Display current weather data in the dashboard
   function displayCurrentWeather(data) {
     const { name, weather, main, wind } = data;
     const weatherCondition = weather[0].main; // Get the main weather condition
     const weatherWidget = $("#current-weather"); // Your weather widget/container
-  
+
     // Set the background gradient based on weather condition
     weatherWidget.removeClass(); // Remove previous background class
-  
+
     switch (weatherCondition) {
-      case 'Clear':
-        weatherWidget.addClass('gradient-clear-sky');
+      case "Clear":
+        weatherWidget.addClass("gradient-clear-sky");
         break;
-      case 'Clouds':
-        weatherWidget.addClass('gradient-clouds');
+      case "Clouds":
+        weatherWidget.addClass("gradient-clouds");
         break;
-      case 'Rain':
-        weatherWidget.addClass('gradient-rain');
+      case "Rain":
+        weatherWidget.addClass("gradient-rain");
         break;
-      case 'Snow':
-        weatherWidget.addClass('gradient-snow');
+      case "Snow":
+        weatherWidget.addClass("gradient-snow");
         break;
-      case 'Thunderstorm':
-        weatherWidget.addClass('gradient-thunderstorm');
+      case "Thunderstorm":
+        weatherWidget.addClass("gradient-thunderstorm");
         break;
-      case 'Drizzle':
-        weatherWidget.addClass('gradient-drizzle');
+      case "Drizzle":
+        weatherWidget.addClass("gradient-drizzle");
         break;
-      case 'Mist':
-        weatherWidget.addClass('gradient-mist');
+      case "Mist":
+        weatherWidget.addClass("gradient-mist");
         break;
       default:
-        weatherWidget.addClass('gradient-clear-sky'); // Default to clear sky gradient
+        weatherWidget.addClass("gradient-clear-sky"); // Default to clear sky gradient
     }
-  
+
     const weatherHtml = `
       <h3>${name}</h3>
       <p><strong>Condition:</strong> ${weather[0].description}</p>
@@ -77,16 +79,16 @@ $(document).ready(function () {
       <p><strong>Wind Speed:</strong> ${wind.speed} m/s</p>
       <img src="http://openweathermap.org/img/wn/${weather[0].icon}@2x.png" alt="Weather Icon">
     `;
-    
+
     weatherWidget.show();
     weatherWidget.html(weatherHtml);
-  
+
     // Toggle temperature unit on button click
     $("#toggle-temp").on("click", function () {
       const tempCelsius = main.temp;
-      const tempFahrenheit = (tempCelsius * 9/5) + 32;
+      const tempFahrenheit = (tempCelsius * 9) / 5 + 32;
       const currentUnit = $("#temperature").text().includes("°C") ? "C" : "F";
-  
+
       if (currentUnit === "C") {
         $("#temperature").text(`${tempFahrenheit.toFixed(1)}°F`);
         $(this).text("Toggle °C");
@@ -96,48 +98,51 @@ $(document).ready(function () {
       }
     });
   }
-  
 
   // Fetch 5-day forecast data
-  function fetchForecastData(city) {
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}`;
+function fetchForecastData(city) {
+  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}`;
 
-    $.get(forecastUrl, function (forecastData) {
+  $.get(forecastUrl, function (forecastData) {
       updateForecastCharts(forecastData);
-    }).fail(function () {
+
+      // Store 5-day forecast data in localStorage
+      storeWeatherDataInLocalStorage(city, forecastData.list);
+  }).fail(function () {
       alert("Failed to fetch 5-day forecast");
-    });
-  }
+  });
+}
 
   // Update charts with 5-day forecast data
   function updateForecastCharts(forecastData) {
     const dailyTemps = [];
     const weatherConditions = {};
     const labels = [];
-  
+
     // Extract data for the next 5 days
     forecastData.list.forEach((item, index) => {
-        if (index % 8 === 0) { // Every 8th item represents a new day
-            const temp = item.main.temp;
-            const weatherDesc = item.weather[0].main;
-            const date = new Date(item.dt * 1000).toLocaleDateString();
-  
-            dailyTemps.push(temp);
-            labels.push(date);
-  
-            if (weatherConditions[weatherDesc]) {
-                weatherConditions[weatherDesc]++;
-            } else {
-                weatherConditions[weatherDesc] = 1;
-            }
+      if (index % 8 === 0) {
+        // Every 8th item represents a new day
+        const temp = item.main.temp;
+        const weatherDesc = item.weather[0].main;
+        const date = new Date(item.dt * 1000).toLocaleDateString();
+
+        dailyTemps.push(temp);
+        labels.push(date);
+
+        if (weatherConditions[weatherDesc]) {
+          weatherConditions[weatherDesc]++;
+        } else {
+          weatherConditions[weatherDesc] = 1;
         }
+      }
     });
-  
+
     // Destroy previous chart instances if they exist
     if (barChartInstance) barChartInstance.destroy();
     if (doughnutChartInstance) doughnutChartInstance.destroy();
     if (lineChartInstance) lineChartInstance.destroy();
-  
+
     // Create gradients
     const barCtx = $("#barChart")[0].getContext("2d");
     const doughnutCtx = $("#doughnutChart")[0].getContext("2d");
@@ -177,68 +182,103 @@ $(document).ready(function () {
 
     // Bar Chart: Temperatures for the next 5 days
     barChartInstance = new Chart(barCtx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "5-Day Temperature",
-                data: dailyTemps,
-                backgroundColor: function (context) {
-                    const weatherCondition = forecastData.list[context.dataIndex * 8].weather[0].main;
-                    switch (weatherCondition) {
-                        case 'Clear': return clearSkyGradient;
-                        case 'Clouds': return cloudsGradient;
-                        case 'Rain': return rainGradient;
-                        case 'Snow': return snowGradient;
-                        case 'Thunderstorm': return thunderstormGradient;
-                        case 'Drizzle': return drizzleGradient;
-                        case 'Mist': return mistGradient;
-                        default: return clearSkyGradient; // Default to clear sky gradient
-                    }
-                }
-            }]
-        }
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "5-Day Temperature",
+            data: dailyTemps,
+            backgroundColor: function (context) {
+              const weatherCondition =
+                forecastData.list[context.dataIndex * 8].weather[0].main;
+              switch (weatherCondition) {
+                case "Clear":
+                  return clearSkyGradient;
+                case "Clouds":
+                  return cloudsGradient;
+                case "Rain":
+                  return rainGradient;
+                case "Snow":
+                  return snowGradient;
+                case "Thunderstorm":
+                  return thunderstormGradient;
+                case "Drizzle":
+                  return drizzleGradient;
+                case "Mist":
+                  return mistGradient;
+                default:
+                  return clearSkyGradient; // Default to clear sky gradient
+              }
+            },
+          },
+        ],
+      },
     });
-  
+
     // Doughnut Chart: Percentage of different weather conditions
     doughnutChartInstance = new Chart(doughnutCtx, {
-        type: "doughnut",
-        data: {
-            labels: Object.keys(weatherConditions),
-            datasets: [{
-                data: Object.values(weatherConditions),
-                backgroundColor: function (context) {
-                    const weatherCondition = Object.keys(weatherConditions)[context.dataIndex]; // Correcting weather condition reference
-                    switch (weatherCondition) {
-                        case 'Clear': return clearSkyGradient;
-                        case 'Clouds': return cloudsGradient;
-                        case 'Rain': return rainGradient;
-                        case 'Snow': return snowGradient;
-                        case 'Thunderstorm': return thunderstormGradient;
-                        case 'Drizzle': return drizzleGradient;
-                        case 'Mist': return mistGradient;
-                        default: return clearSkyGradient; // Default to clear sky gradient
-                    }
-                }
-            }]
-        }
+      type: "doughnut",
+      data: {
+        labels: Object.keys(weatherConditions),
+        datasets: [
+          {
+            data: Object.values(weatherConditions),
+            backgroundColor: function (context) {
+              const weatherCondition =
+                Object.keys(weatherConditions)[context.dataIndex]; // Correcting weather condition reference
+              switch (weatherCondition) {
+                case "Clear":
+                  return clearSkyGradient;
+                case "Clouds":
+                  return cloudsGradient;
+                case "Rain":
+                  return rainGradient;
+                case "Snow":
+                  return snowGradient;
+                case "Thunderstorm":
+                  return thunderstormGradient;
+                case "Drizzle":
+                  return drizzleGradient;
+                case "Mist":
+                  return mistGradient;
+                default:
+                  return clearSkyGradient; // Default to clear sky gradient
+              }
+            },
+          },
+        ],
+      },
     });
-  
+
     // Line Chart: Temperature changes over the next 5 days
     lineChartInstance = new Chart(lineCtx, {
-        type: "line",
-        data: {
-            labels: labels,
-            datasets: [{
-                label: "Temperature",
-                data: dailyTemps,
-                backgroundColor: clearSkyGradient,  // You can apply different gradients as needed
-                borderColor: "#2980b9", // Keep a solid color for the line
-                fill: true
-            }]
-        }
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Temperature",
+            data: dailyTemps,
+            backgroundColor: clearSkyGradient, // You can apply different gradients as needed
+            borderColor: "#2980b9", // Keep a solid color for the line
+            fill: true,
+          },
+        ],
+      },
     });
-}
+  }
 
+  // Function to store weather data in localStorage
+function storeWeatherDataInLocalStorage(city, forecastData) {
+  const existingData = JSON.parse(localStorage.getItem('weatherData')) || {};
   
+  const weatherData = {
+      city: city,
+      forecast: forecastData, // Update the forecast data
+      timestamp: new Date().getTime() // Optional: Store the time for potential future use
+  };
+
+  localStorage.setItem('weatherData', JSON.stringify(weatherData));
+}
 });
