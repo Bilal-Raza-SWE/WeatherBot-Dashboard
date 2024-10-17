@@ -1,7 +1,12 @@
 $(document).ready(function () {
   const apiKey = "76ce68845a2e4cfb0d47d6a81c8f7e11";
-
   let barChartInstance, doughnutChartInstance, lineChartInstance;
+
+  // Check if there is already stored current weather data
+  const storedCurrentWeatherData = JSON.parse(localStorage.getItem("currentWeatherData"));
+  if (storedCurrentWeatherData) {
+    displayCurrentWeather(storedCurrentWeatherData); // Use stored data to display weather
+  }
 
   // Search button click event
   function SearchButton() {
@@ -23,23 +28,27 @@ $(document).ready(function () {
   });
 
   // Fetch current weather data from OpenWeather API
-function fetchWeatherData(city) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+  function fetchWeatherData(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
 
-  $.get(url, function (data) {
+    $.get(url, function (data) {
       displayCurrentWeather(data);
 
       // Ensure to store the current weather as well
       storeWeatherDataInLocalStorage(city, data);
-  }).fail(function () {
+    }).fail(function () {
       alert("City not found or API error");
-  });
-}
+    });
+  }
+
   // Display current weather data in the dashboard
   function displayCurrentWeather(data) {
     const { name, weather, main, wind } = data;
     const weatherCondition = weather[0].main; // Get the main weather condition
     const weatherWidget = $("#current-weather"); // Your weather widget/container
+
+    // Store current weather data in localStorage
+    localStorage.setItem("currentWeatherData", JSON.stringify(data));
 
     // Set the background gradient based on weather condition
     weatherWidget.removeClass(); // Remove previous background class
