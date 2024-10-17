@@ -45,36 +45,22 @@
           </div>
           <table>
             <thead>
-              <!-- Table Header -->
               <tr>
                 <th class="date-column">Date</th>
+                <th class="time-column">Time</th>
+                <th class="city-column">City</th>
                 <th class="temp-column">Temperature (°C)</th>
                 <th class="condition-column">Weather Condition</th>
                 <th class="humidity-column">Humidity (%)</th>
                 <th class="wind-column">Wind Speed</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="forecast-table-body">
               <!-- Weather data will be dynamically inserted here -->
-              <tr>
-                <td class="date-column">2024-10-17</td>
-                <td class="temp-column">
-                  <span class="temperature-display">25</span>
-                  <span class="temperature-unit">°C</span>
-                </td>
-                <td class="condition-column">
-                  <span class="weather-condition-display">Sunny</span>
-                </td>
-                <td class="humidity-column">
-                  <span class="humidity-display">60%</span>
-                </td>
-                <td class="wind-column">
-                  <span class="wind-speed-display">12 km/h</span>
-                </td>
-              </tr>
             </tbody>
           </table>
-          <div class="pagination">
+          
+          <div id="pagination-container" class="pagination">
             <button class="btn-prev">Previous</button>
             <button class="btn-next">Next</button>
           </div>

@@ -165,8 +165,8 @@ th {
   padding: 12px;
   text-align: left;
   font-weight: 500;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 10%;
+  border-top-right-radius: 10%;
 }
 
 th.temp-column,
@@ -180,7 +180,7 @@ td {
   padding: 12px;
   background-color: white;
   border: 1px solid #e0e0e0;
-  text-align: left; /* Ensures non-numerical data is left aligned */
+  text-align: left; 
 }
 
 td.temp-column,
@@ -200,14 +200,20 @@ tr:hover td {
 
 
 th.date-column {
-  width: 15%; 
+  width: 20%; 
 }
 
 th.temp-column,
 th.condition-column,
 th.humidity-column,
-th.wind-column {
+th.wind-column,
+.time-column
+ {
   width: 15%; 
+}
+
+.city-column {
+  width: 20%;
 }
 
 .temperature-display {
