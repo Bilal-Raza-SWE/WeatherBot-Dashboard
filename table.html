@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather Tables</title>
-  <link rel="stylesheet" href="Table-style.css">
+  <title>WeatherBot - Tables</title>
+  <link rel="stylesheet" href="table-style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 
@@ -20,52 +20,82 @@
         </ul>
       </nav>
     </aside>
+
     <main class="main-content">
       <header>
         <div class="search-bar">
-          <input type="text" placeholder="SEARCH BAR" id="table-search">
+          <input type="text" id="city-input" placeholder="Search for a city...">
           <button type="button" id="search-button">Search</button>
-
         </div>
         <div class="user-profile">
-          <img src="https://placehold.co/60" alt="User Profile" class="profile-img">
+          <img src="https://placehold.co/60" alt="User Profile">
         </div>
       </header>
+
       <div class="content-wrapper">
-        <section class="weather-table">
-          <h2>Forecast Table</h2>
-          <table id="forecast-table">
+        <div class="weather-table">
+          <div class="table-header">
+            <h2>5-Day Weather Forecast Table</h2>
+            <div class="filter-buttons">
+              <button class="btn">Sort by Temp (Asc)</button>
+              <button class="btn">Sort by Temp (Desc)</button>
+              <button class="btn">Filter by Rainy Days</button>
+              <button class="btn">Highest Temperature</button>
+            </div>
+          </div>
+          <table>
             <thead>
+              <!-- Table Header -->
               <tr>
-                <th>Date</th>
-                <th>Temperature</th>
-                <th>Condition</th>
+                <th class="date-column">Date</th>
+                <th class="temp-column">Temperature (°C)</th>
+                <th class="condition-column">Weather Condition</th>
+                <th class="humidity-column">Humidity (%)</th>
+                <th class="wind-column">Wind Speed</th>
               </tr>
             </thead>
             <tbody>
-              <!-- Table content will be inserted here -->
+              <!-- Weather data will be dynamically inserted here -->
+              <tr>
+                <td class="date-column">2024-10-17</td>
+                <td class="temp-column">
+                  <span class="temperature-display">25</span>
+                  <span class="temperature-unit">°C</span>
+                </td>
+                <td class="condition-column">
+                  <span class="weather-condition-display">Sunny</span>
+                </td>
+                <td class="humidity-column">
+                  <span class="humidity-display">60%</span>
+                </td>
+                <td class="wind-column">
+                  <span class="wind-speed-display">12 km/h</span>
+                </td>
+              </tr>
             </tbody>
           </table>
-        </section>
-        <section class="chatbot">
+          <div class="pagination">
+            <button class="btn-prev">Previous</button>
+            <button class="btn-next">Next</button>
+          </div>
+        </div>
+
+        <div class="chatbot">
           <h2>Chatbot Interaction</h2>
           <div class="chat-window">
             <div class="chat-messages">
-              <h3>Chatbot Responses</h3>
-              <!-- Chatbot messages will be inserted here -->
+              <!-- Chat messages will be dynamically inserted here -->
             </div>
             <div class="chat-input-container">
-              <input type="text" placeholder="Type your message..." id="chat-input">
-              <button type="button" id="send-button">
-              <img src="Images/paper-plane.png" alt="Send">
-              </button>
+              <input type="text" id="chat-input" placeholder="Type your message...">
+              <button id="send-button">Send</button>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   </div>
-  <script src="Weather.js"></script>
+  <script src="table.js"></script>
 </body>
 
 </html>
