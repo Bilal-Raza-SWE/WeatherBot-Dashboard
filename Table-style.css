@@ -306,6 +306,8 @@ th.wind-column,
   background-color: #f0f2f5;
   padding: 2%;
   margin-bottom: 2%;
+  overflow-y: auto;
+  max-height: 110vh; 
 }
 
 .chat-input-container {
@@ -332,7 +334,7 @@ th.wind-column,
   margin-left: auto;
   text-align: right;
   padding: 10px 15px;
-  border-radius: 15px 15px 0 15px; /* Top-left and bottom-right rounded */
+  border-radius: 15px 15px 0 15px; 
   margin-bottom: 10px;
   max-width: 80%;
 }
@@ -344,7 +346,7 @@ th.wind-column,
   margin-right: auto;
   text-align: left;
   padding: 10px 15px;
-  border-radius: 15px 15px 15px 0; /* Top-right and bottom-left rounded */
+  border-radius: 15px 15px 15px 0; 
   margin-bottom: 10px;
   max-width: 80%;
 }
@@ -352,16 +354,26 @@ th.wind-column,
 .chat-message .timestamp {
   font-size: 10px;
   color: #999;
-  position: absolute;
   bottom: 5px;
+  margin: 2%;
 }
 
-.user-message .timestamp {
-  right: 15px;
+.chat-message .bot-message {
+  word-wrap: break-word; /* Ensures long words break and wrap to the next line */
+  overflow-wrap: break-word; /* Ensures long words break and wrap to the next line */
+  white-space: pre-wrap; /* Preserves whitespace and wraps text */
+  table-layout: fixed; /* Allows table to take only the required space */
 }
 
-.bot-message .timestamp {
-  left: 15px;
+.weather-table, .chatbot {
+  overflow: hidden; /* Ensures content does not overflow the container */
+}
+
+.weather-table table, .chatbot-table {
+  table-layout: fixed; /* Allows table to take only the required space */
+  max-width: 100%; /* Ensures table does not exceed the container width */
+  word-wrap: break-word; /* Ensures long words break and wrap to the next line */
+  overflow-wrap: break-word; /* Ensures long words break and wrap to the next line */
 }
 
 .chat-input-container {
