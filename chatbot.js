@@ -41,28 +41,62 @@ $(document).ready(function () {
       url: `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${weatherApiKey}&units=metric`,
       method: "GET",
       success: function (data) {
-        const forecast = data.list
-          .slice(0, 5)
-          .map((entry) => {
-            return `Forecast for ${city} at ${entry.dt_txt}: ${entry.weather[0].description}, ${entry.main.temp}°C. Humidity: ${entry.main.humidity}%, Wind speed: ${entry.wind.speed} m/s.`;
-          })
-          .join("\n");
-        displayChatbotResponse(forecast);
+        displayWeatherForecastTable(city, data.list);
       },
       error: function () {
         displayChatbotResponse(
           "Sorry, I could not fetch the weather forecast for that city."
         );
-      },
+      }
     });
   }
 
   // Function to display chatbot responses
-  function displayChatbotResponse(response) {
-    $(".chat-messages").append(
-      `<div class="chat-message bot-message">${response}</div>`
-    );
+function displayChatbotResponse(response, isTable = false) {
+  const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  let chatMessage = `<div class="chat-message bot-message">${response}<span class="timestamp">${timestamp}</span></div>`;
+  
+  if (isTable) {
+    $(".chat-messages").append(chatMessage);
+  } else {
+    $(".chat-messages").append(chatMessage);
   }
+}
+
+// Function to display weather forecast in table format
+function displayWeatherForecastTable(city, data) {
+  let tableHtml = `
+    <table class="chatbot-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Temp (°C)</th>
+          <th>Condition</th>
+          <th>Humidity</th>
+          <th>Wind Speed</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  data.slice(0, 5).forEach(entry => {
+    const date = entry.dt_txt.split(" ")[0];
+    const time = entry.dt_txt.split(" ")[1];
+    tableHtml += `
+      <tr>
+        <td>${date}</td>
+        <td>${time}</td>
+        <td>${entry.main.temp}°C</td>
+        <td>${entry.weather[0].description}</td>
+        <td>${entry.main.humidity}%</td>
+        <td>${entry.wind.speed} m/s</td>
+      </tr>
+    `;
+  });
+  tableHtml += `</tbody></table>`;
+  displayChatbotResponse(tableHtml, true);
+}
 
   // Event listener for send button
   function sendMessage() {
@@ -99,7 +133,7 @@ $(document).ready(function () {
   // Function to handle non-weather-related queries using Gemini API
   function handleGeneralQuery(query) {
     $.ajax({
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateText?key=${geminiApiKey}`, // Correct Gemini API endpoint
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, // Correct Gemini API endpoint
       method: "POST",
       contentType: "application/json",
       data: JSON.stringify({
