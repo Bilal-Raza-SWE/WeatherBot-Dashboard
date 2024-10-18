@@ -8,6 +8,12 @@ $(document).ready(function () {
     displayCurrentWeather(storedCurrentWeatherData); // Use stored data to display weather
   }
 
+  // Check if there is already stored forecast weather data
+  const storedForecastData = JSON.parse(localStorage.getItem("weatherData"));
+  if (storedForecastData) {
+    updateForecastCharts({ list: storedForecastData.forecast }); // Use stored forecast data to update charts
+  }
+
   // Search button click event
   function SearchButton() {
     const city = $("#city-input").val().toLowerCase().trim();
