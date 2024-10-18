@@ -338,17 +338,17 @@ th.wind-column,
 }
 
 #send-button {
-  background-color: #3498db;
   border: none;
-  color: white;
   padding: 12px;
-  border-radius: 25px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-#send-button:hover {
-  background-color: #2980b9;
+#send-button img {
+  transition: transform 0.3s ease;
+}
+
+#send-button:hover img {
+  transform: scale(1.1);
 }
 
 /* === RESPONSIVE DESIGN (Mobile view) === */
