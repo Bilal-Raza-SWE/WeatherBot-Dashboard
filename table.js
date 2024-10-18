@@ -1,29 +1,29 @@
 $(document).ready(function () {
-    const weatherData = JSON.parse(localStorage.getItem('weatherData'));
+  const weatherData = JSON.parse(sessionStorage.getItem("weatherData"));
 
-    if (weatherData) {
-        const forecastList = weatherData.forecast;
-        const city = weatherData.city;
+  if (weatherData) {
+    const forecastList = weatherData.forecast;
+    const city = weatherData.city;
 
-        const entriesPerPage = 10;
-        let currentPage = 1;
+    const entriesPerPage = 10;
+    let currentPage = 1;
 
-        function renderTable(page) {
-            const startIndex = (page - 1) * entriesPerPage;
-            const endIndex = startIndex + entriesPerPage;
-            const paginatedData = forecastList.slice(startIndex, endIndex);
+    function renderTable(page) {
+      const startIndex = (page - 1) * entriesPerPage;
+      const endIndex = startIndex + entriesPerPage;
+      const paginatedData = forecastList.slice(startIndex, endIndex);
 
-            $('#forecast-table-body').empty(); // Clear old data
+      $("#forecast-table-body").empty();
 
-            paginatedData.forEach(entry => {
-                const date = entry.dt_txt.split(' ')[0];
-                const time = entry.dt_txt.split(' ')[1].slice(0, 5); // Get time
-                const temp = entry.main.temp.toFixed(1);
-                const condition = entry.weather[0].description;
-                const humidity = entry.main.humidity;
-                const windSpeed = entry.wind.speed;
+      paginatedData.forEach((entry) => {
+        const date = entry.dt_txt.split(" ")[0];
+        const time = entry.dt_txt.split(" ")[1].slice(0, 5);
+        const temp = entry.main.temp.toFixed(1);
+        const condition = entry.weather[0].description;
+        const humidity = entry.main.humidity;
+        const windSpeed = entry.wind.speed;
 
-                const tableRow = `
+        const tableRow = `
                     <tr>
                         <td class="date-column">${date}</td>
                         <td class="time-column">${time}</td>
@@ -38,49 +38,48 @@ $(document).ready(function () {
                     </tr>
                 `;
 
-                $('#forecast-table-body').append(tableRow);
-            });
+        $("#forecast-table-body").append(tableRow);
+      });
 
-            // Update button states
-            updatePaginationButtons();
-        }
+      updatePaginationButtons();
+    }
 
-        function updatePaginationButtons() {
-            const totalPages = Math.ceil(forecastList.length / entriesPerPage);
+    function updatePaginationButtons() {
+      const totalPages = Math.ceil(forecastList.length / entriesPerPage);
 
-            if (currentPage === 1) {
-                $('.btn-prev').addClass('disabled');
-            } else {
-                $('.btn-prev').removeClass('disabled');
-            }
+      if (currentPage === 1) {
+        $(".btn-prev").addClass("disabled");
+      } else {
+        $(".btn-prev").removeClass("disabled");
+      }
 
-            if (currentPage === totalPages) {
-                $('.btn-next').addClass('disabled');
-            } else {
-                $('.btn-next').removeClass('disabled');
-            }
-        }
+      if (currentPage === totalPages) {
+        $(".btn-next").addClass("disabled");
+      } else {
+        $(".btn-next").removeClass("disabled");
+      }
+    }
 
-        // Initial render
+    renderTable(currentPage);
+
+    // Pagination logic
+    $(".btn-next").on("click", function () {
+      const totalPages = Math.ceil(forecastList.length / entriesPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
         renderTable(currentPage);
+      }
+    });
 
-        // Pagination logic
-        $('.btn-next').on('click', function () {
-            const totalPages = Math.ceil(forecastList.length / entriesPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable(currentPage);
-            }
-        });
-
-        $('.btn-prev').on('click', function () {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable(currentPage);
-            }
-        });
-    }
-    else {
-        console.error('No weather data found in localStorage or forecast is missing.');
-    }
+    $(".btn-prev").on("click", function () {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable(currentPage);
+      }
+    });
+  } else {
+    console.error(
+      "No weather data found in sessionStorage or forecast is missing."
+    );
+  }
 });

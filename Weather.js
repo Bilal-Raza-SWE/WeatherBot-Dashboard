@@ -3,13 +3,13 @@ $(document).ready(function () {
   let barChartInstance, doughnutChartInstance, lineChartInstance;
 
   // Check if there is already stored current weather data
-  const storedCurrentWeatherData = JSON.parse(localStorage.getItem("currentWeatherData"));
+  const storedCurrentWeatherData = JSON.parse(sessionStorage.getItem("currentWeatherData"));
   if (storedCurrentWeatherData) {
     displayCurrentWeather(storedCurrentWeatherData); // Use stored data to display weather
   }
 
   // Check if there is already stored forecast weather data
-  const storedForecastData = JSON.parse(localStorage.getItem("weatherData"));
+  const storedForecastData = JSON.parse(sessionStorage.getItem("weatherData"));
   if (storedForecastData) {
     updateForecastCharts({ list: storedForecastData.forecast }); // Use stored forecast data to update charts
   }
@@ -41,7 +41,7 @@ $(document).ready(function () {
       displayCurrentWeather(data);
 
       // Ensure to store the current weather as well
-      storeWeatherDataInLocalStorage(city, data);
+      storeWeatherDataInSessionStorage(city, data);
     }).fail(function () {
       alert("City not found or API error");
     });
@@ -50,14 +50,14 @@ $(document).ready(function () {
   // Display current weather data in the dashboard
   function displayCurrentWeather(data) {
     const { name, weather, main, wind } = data;
-    const weatherCondition = weather[0].main; // Get the main weather condition
-    const weatherWidget = $("#current-weather"); // Your weather widget/container
+    const weatherCondition = weather[0].main;
+    const weatherWidget = $("#current-weather");
 
-    // Store current weather data in localStorage
-    localStorage.setItem("currentWeatherData", JSON.stringify(data));
+    // Store current weather data in sessionStorage
+    sessionStorage.setItem("currentWeatherData", JSON.stringify(data));
 
     // Set the background gradient based on weather condition
-    weatherWidget.removeClass(); // Remove previous background class
+    weatherWidget.removeClass();
 
     switch (weatherCondition) {
       case "Clear":
@@ -82,7 +82,7 @@ $(document).ready(function () {
         weatherWidget.addClass("gradient-mist");
         break;
       default:
-        weatherWidget.addClass("gradient-clear-sky"); // Default to clear sky gradient
+        weatherWidget.addClass("gradient-clear-sky");
     }
 
     const weatherHtml = `
@@ -115,18 +115,18 @@ $(document).ready(function () {
   }
 
   // Fetch 5-day forecast data
-function fetchForecastData(city) {
-  const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}`;
+  function fetchForecastData(city) {
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}`;
 
-  $.get(forecastUrl, function (forecastData) {
+    $.get(forecastUrl, function (forecastData) {
       updateForecastCharts(forecastData);
 
-      // Store 5-day forecast data in localStorage
-      storeWeatherDataInLocalStorage(city, forecastData.list);
-  }).fail(function () {
+      // Store 5-day forecast data in sessionStorage
+      storeWeatherDataInSessionStorage(city, forecastData.list);
+    }).fail(function () {
       alert("Failed to fetch 5-day forecast");
-  });
-}
+    });
+  }
 
   // Update charts with 5-day forecast data
   function updateForecastCharts(forecastData) {
@@ -284,16 +284,17 @@ function fetchForecastData(city) {
     });
   }
 
-  // Function to store weather data in localStorage
-function storeWeatherDataInLocalStorage(city, forecastData) {
-  const existingData = JSON.parse(localStorage.getItem('weatherData')) || {};
   
-  const weatherData = {
+  // Function to store weather data in sessionStorage
+  function storeWeatherDataInSessionStorage(city, forecastData) {
+    const existingData = JSON.parse(sessionStorage.getItem('weatherData')) || {};
+    
+    const weatherData = {
       city: city,
-      forecast: forecastData, // Update the forecast data
-      timestamp: new Date().getTime() // Optional: Store the time for potential future use
-  };
+      forecast: forecastData,
+      timestamp: new Date().getTime()
+    };
 
-  localStorage.setItem('weatherData', JSON.stringify(weatherData));
-}
+    sessionStorage.setItem('weatherData', JSON.stringify(weatherData));
+  }
 });
