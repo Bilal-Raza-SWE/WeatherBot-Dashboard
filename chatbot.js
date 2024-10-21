@@ -60,7 +60,7 @@ $(document).ready(function () {
   }
 
   // Add CSS styling for the table
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.innerHTML = `
     .chatbot-table {
       width: auto; !important
@@ -181,19 +181,30 @@ $(document).ready(function () {
 
   // Function to handle non-weather-related queries using Gemini API
   function handleGeneralQuery(query) {
+    // Prepare the request body as per the Gemini API structure
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: query }, // Use the query as the text for Gemini to process
+          ],
+        },
+      ],
+    };
+
     $.ajax({
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, // Correct Gemini API endpoint
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, // Correct Gemini API endpoint
       method: "POST",
       contentType: "application/json",
-      data: JSON.stringify({
-        prompt: {
-          text: query, // Proper query structure as per Gemini API documentation
-        },
-      }),
+      data: JSON.stringify(requestBody), // Convert the requestBody to JSON
       success: function (response) {
-        const geminiAnswer = 
-          (response && response.candidates && response.candidates.length > 0 && response.candidates[0].output) 
-          || "Sorry, I don't have an answer for that.";
+        console.log("Full response from Gemini API:", response); // Log for debugging
+
+        // Correctly access the response data
+        const geminiAnswer =
+          response?.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "Sorry, I don't have an answer for that.";
+
         displayChatbotResponse(geminiAnswer);
       },
       error: function () {
@@ -204,7 +215,3 @@ $(document).ready(function () {
     });
   }
 });
-
-// AIzaSyCSRfPizXNy1ifW48oR_ieJTYHOBEcGWAI
-// https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCSRfPizXNy1ifW48oR_ieJTYHOBEcGWAI
-// 76ce68845a2e4cfb0d47d6a81c8f7e11
