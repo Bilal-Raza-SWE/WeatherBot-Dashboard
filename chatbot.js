@@ -181,30 +181,25 @@ $(document).ready(function () {
 
   // Function to handle non-weather-related queries using Gemini API
   function handleGeneralQuery(query) {
-    // Prepare the request body as per the Gemini API structure
-    const requestBody = {
-      contents: [
-        {
-          parts: [
-            { text: query }, // Use the query as the text for Gemini to process
-          ],
-        },
-      ],
-    };
-
     $.ajax({
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, // Correct Gemini API endpoint
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
       method: "POST",
       contentType: "application/json",
-      data: JSON.stringify(requestBody), // Convert the requestBody to JSON
+      data: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { 
+                text: `${query}. Please give the answer with both normal text and relevant emojis.`  // Add instruction for both text and emojis
+              }
+            ]
+          }
+        ]
+      }),
       success: function (response) {
-        console.log("Full response from Gemini API:", response); // Log for debugging
-
-        // Correctly access the response data
-        const geminiAnswer =
-          response?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        const geminiAnswer = 
+          (response?.candidates?.[0]?.content?.parts?.[0]?.text) ||
           "Sorry, I don't have an answer for that.";
-
         displayChatbotResponse(geminiAnswer);
       },
       error: function () {
@@ -214,4 +209,5 @@ $(document).ready(function () {
       },
     });
   }
+  
 });
