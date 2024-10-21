@@ -182,7 +182,7 @@ $(document).ready(function () {
   // Function to handle non-weather-related queries using Gemini API
   function handleGeneralQuery(query) {
     $.ajax({
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, // Correct Gemini API endpoint
+      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, // Correct Gemini API endpoint
       method: "POST",
       contentType: "application/json",
       data: JSON.stringify({
@@ -191,9 +191,9 @@ $(document).ready(function () {
         },
       }),
       success: function (response) {
-        const geminiAnswer =
-          response?.candidates?.[0]?.output ||
-          "Sorry, I don't have an answer for that.";
+        const geminiAnswer = 
+          (response && response.candidates && response.candidates.length > 0 && response.candidates[0].output) 
+          || "Sorry, I don't have an answer for that.";
         displayChatbotResponse(geminiAnswer);
       },
       error: function () {

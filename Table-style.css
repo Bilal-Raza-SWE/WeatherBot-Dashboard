@@ -374,7 +374,7 @@ th.wind-column,
   max-width: 100%; /* Ensures table does not exceed the container width */
   word-wrap: break-word; /* Ensures long words break and wrap to the next line */
   overflow-wrap: break-word; /* Ensures long words break and wrap to the next line */
-}
+} 
 
 .chat-input-container {
   display: flex;
