@@ -30,16 +30,19 @@ $(document).ready(function () {
     let response = "";
     switch (detailType) {
       case "temperature":
-        response = `The current temperature in ${city} is ${data.main.temp}°C 🌡️.`;
+        response = `The current temperature in ${city} is ${data.main.temp}°C 🌡️🌞⛅🌦.`;
         break;
       case "condition":
-        response = `The current weather condition in ${city} is ${data.weather[0].description} ☁️.`;
+        response = `The current weather condition in ${city} is ${data.weather[0].description} ☁️🌨🌩🌤.`;
         break;
       case "humidity":
         response = `The humidity level in ${city} is ${data.main.humidity}% 💧.`;
         break;
       case "windspeed":
         response = `The wind speed in ${city} is ${data.wind.speed} m/s 💨.`;
+        break;
+      case "weather":
+        response = `The current weather in ${city} is ${data.weather[0].description} 🌞⛅🌦⚡⛈ with a temperature of ${data.main.temp}°C 🌡️, humidity of ${data.main.humidity}% 💧☁️, and wind speed of ${data.wind.speed} m/s 💨.`;
         break;
       default:
         response = `The current weather in ${city} is ${data.weather[0].description} with a temperature of ${data.main.temp}°C 🌡️.`;
@@ -109,15 +112,17 @@ $(document).ready(function () {
       detailType = "humidity";
     } else if (query.toLowerCase().includes("wind speed")) {
       detailType = "windspeed";
-    } else if (query.toLowerCase().includes("forecast") || query.toLowerCase().includes("5-day")) {
+    } else if (query.toLowerCase().includes("weather")) {
+      detailType = "weather";
+    } else if (
+      query.toLowerCase().includes("forecast") ||
+      query.toLowerCase().includes("5-day")
+    ) {
       detailType = "forecast";
-    } else {
-      // Default to current weather if not specified
-      detailType = "current";
     }
 
-    // Call OpenWeather API based on user input
-    if (city) {
+    // Call OpenWeather API if a city is detected and related detail is specified
+    if (city && detailType) {
       handleWeatherQuery(city, detailType);
     } else {
       // Fallback to Gemini API for general queries
@@ -130,15 +135,15 @@ $(document).ready(function () {
             {
               parts: [
                 {
-                  text: `${query}. Please provide a response with both normal text and emojis.`
-                }
-              ]
-            }
-          ]
+                  text: `${query}. Please provide a response with both normal text and emojis.`,
+                },
+              ],
+            },
+          ],
         }),
         success: function (response) {
           const geminiAnswer =
-            (response?.candidates?.[0]?.content?.parts?.[0]?.text) ||
+            response?.candidates?.[0]?.content?.parts?.[0]?.text ||
             "Sorry, I don't have an answer for that.";
           displayChatbotResponse(geminiAnswer);
         },
