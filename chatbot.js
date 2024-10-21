@@ -2,6 +2,11 @@ $(document).ready(function () {
   const weatherApiKey = "76ce68845a2e4cfb0d47d6a81c8f7e11"; // OpenWeatherMap API key
   const geminiApiKey = "AIzaSyCSRfPizXNy1ifW48oR_ieJTYHOBEcGWAI"; // Gemini API key
 
+  // Initialize session storage for conversation context
+  if (!sessionStorage.getItem("conversationContext")) {
+    sessionStorage.setItem("conversationContext", JSON.stringify({}));
+  }
+
   // Function to handle weather queries using OpenWeather API
   function handleWeatherQuery(city, detailType) {
     const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}&units=metric`;
@@ -112,19 +117,27 @@ $(document).ready(function () {
       detailType = "humidity";
     } else if (query.toLowerCase().includes("wind speed")) {
       detailType = "windspeed";
-    } else if (query.toLowerCase().includes("weather")) {
-      detailType = "weather";
     } else if (
       query.toLowerCase().includes("forecast") ||
       query.toLowerCase().includes("5-day")
     ) {
       detailType = "forecast";
+    } else if (query.toLowerCase().includes("weather")) {
+      detailType = "weather";
     }
 
     // Call OpenWeather API if a city is detected and related detail is specified
     if (city && detailType) {
       handleWeatherQuery(city, detailType);
+      // Store context
+      storeConversationContext("lastWeatherQuery", { city, detailType });
     } else {
+      // Check if previous context is relevant for the current query
+      const context = getConversationContext();
+      if (context.lastGeminiQuery) {
+        query = `${context.lastGeminiQuery} ${query}`;
+      }
+
       // Fallback to Gemini API for general queries
       $.ajax({
         url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
@@ -146,6 +159,8 @@ $(document).ready(function () {
             response?.candidates?.[0]?.content?.parts?.[0]?.text ||
             "Sorry, I don't have an answer for that.";
           displayChatbotResponse(geminiAnswer);
+          // Store the latest query for future context
+          storeConversationContext("lastGeminiQuery", query);
         },
         error: function () {
           displayChatbotResponse(
@@ -160,6 +175,18 @@ $(document).ready(function () {
   function extractCityFromQuery(query) {
     const words = query.split(" ");
     return words[words.length - 1]; // Assuming the last word is the city
+  }
+
+  // Store conversation context in session storage
+  function storeConversationContext(key, value) {
+    const context = JSON.parse(sessionStorage.getItem("conversationContext"));
+    context[key] = value;
+    sessionStorage.setItem("conversationContext", JSON.stringify(context));
+  }
+
+  // Get conversation context from session storage
+  function getConversationContext() {
+    return JSON.parse(sessionStorage.getItem("conversationContext"));
   }
 
   // Event listener for sending message
