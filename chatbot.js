@@ -35,10 +35,10 @@ $(document).ready(function () {
     let response = "";
     switch (detailType) {
       case "temperature":
-        response = `The current temperature in ${city} is ${data.main.temp}°C 🌡️.`;
+        response = `The current temperature in ${city} is ${data.main.temp}°C 🌡️🌞⛅🌦.`;
         break;
       case "condition":
-        response = `The current weather condition in ${city} is ${data.weather[0].description} ☁️.`;
+        response = `The current weather condition in ${city} is ${data.weather[0].description} ☁️🌨🌩🌤.`;
         break;
       case "humidity":
         response = `The humidity level in ${city} is ${data.main.humidity}% 💧.`;
@@ -47,7 +47,7 @@ $(document).ready(function () {
         response = `The wind speed in ${city} is ${data.wind.speed} m/s 💨.`;
         break;
       case "weather":
-        response = `The current weather in ${city} is ${data.weather[0].description} with a temperature of ${data.main.temp}°C 🌡️, humidity of ${data.main.humidity}% 💧, and wind speed of ${data.wind.speed} m/s 💨.`;
+        response = `The current weather in ${city} is ${data.weather[0].description} 🌞⛅🌦⚡⛈ with a temperature of ${data.main.temp}°C 🌡️, humidity of ${data.main.humidity}% 💧☁️, and wind speed of ${data.wind.speed} m/s 💨.`;
         break;
       default:
         response = `The current weather in ${city} is ${data.weather[0].description} with a temperature of ${data.main.temp}°C 🌡️.`;
@@ -104,52 +104,41 @@ $(document).ready(function () {
     $(".chat-messages").append(chatMessage);
   }
 
-  // Enhanced Function to extract city name from query using OpenWeather API
-  function extractCityFromQuery(query) {
-    const words = query.split(" ");
-    for (let word of words) {
-      const citySearchUrl = `https://api.openweathermap.org/data/2.5/weather?q=${word}&appid=${weatherApiKey}`;
-      $.ajax({
-        url: citySearchUrl,
-        method: "GET",
-        success: function (data) {
-          if (data && data.name) {
-            // Return city name if found
-            handleWeatherQuery(data.name, detectWeatherDetail(query));
-            return data.name;
-          }
-        },
-        error: function () {
-          // Handle error but continue the search
-        },
-      });
-    }
-    return null;
-  }
-
-  // Function to detect which weather detail is being requested
-  function detectWeatherDetail(query) {
-    if (query.toLowerCase().includes("temperature")) {
-      return "temperature";
-    } else if (query.toLowerCase().includes("condition")) {
-      return "condition";
-    } else if (query.toLowerCase().includes("humidity")) {
-      return "humidity";
-    } else if (query.toLowerCase().includes("wind speed")) {
-      return "windspeed";
-    } else if (query.toLowerCase().includes("forecast") || query.toLowerCase().includes("5-day")) {
-      return "forecast";
-    } else if (query.toLowerCase().includes("weather")) {
-      return "weather";
-    }
-    return "current";
-  }
-
   // Function to send a user query to Gemini API
   function sendQueryToGemini(query) {
     const city = extractCityFromQuery(query);
-    if (!city) {
-      // If no city is found, fallback to Gemini API for non-weather queries
+    let detailType = "";
+
+    if (query.toLowerCase().includes("temperature")) {
+      detailType = "temperature";
+    } else if (query.toLowerCase().includes("condition")) {
+      detailType = "condition";
+    } else if (query.toLowerCase().includes("humidity")) {
+      detailType = "humidity";
+    } else if (query.toLowerCase().includes("wind speed")) {
+      detailType = "windspeed";
+    } else if (
+      query.toLowerCase().includes("forecast") ||
+      query.toLowerCase().includes("5-day")
+    ) {
+      detailType = "forecast";
+    } else if (query.toLowerCase().includes("weather")) {
+      detailType = "weather";
+    }
+
+    // Call OpenWeather API if a city is detected and related detail is specified
+    if (city && detailType) {
+      handleWeatherQuery(city, detailType);
+      // Store context
+      storeConversationContext("lastWeatherQuery", { city, detailType });
+    } else {
+      // Check if previous context is relevant for the current query
+      const context = getConversationContext();
+      if (context.lastGeminiQuery) {
+        query = `${context.lastGeminiQuery} ${query}`;
+      }
+
+      // Fallback to Gemini API for general queries
       $.ajax({
         url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
         method: "POST",
@@ -170,6 +159,8 @@ $(document).ready(function () {
             response?.candidates?.[0]?.content?.parts?.[0]?.text ||
             "Sorry, I don't have an answer for that.";
           displayChatbotResponse(geminiAnswer);
+          // Store the latest query for future context
+          storeConversationContext("lastGeminiQuery", query);
         },
         error: function () {
           displayChatbotResponse(
@@ -178,6 +169,24 @@ $(document).ready(function () {
         },
       });
     }
+  }
+
+  // Function to extract city name from query
+  function extractCityFromQuery(query) {
+    const words = query.split(" ");
+    return words[words.length - 1]; // Assuming the last word is the city
+  }
+
+  // Store conversation context in session storage
+  function storeConversationContext(key, value) {
+    const context = JSON.parse(sessionStorage.getItem("conversationContext"));
+    context[key] = value;
+    sessionStorage.setItem("conversationContext", JSON.stringify(context));
+  }
+
+  // Get conversation context from session storage
+  function getConversationContext() {
+    return JSON.parse(sessionStorage.getItem("conversationContext"));
   }
 
   // Event listener for sending message
