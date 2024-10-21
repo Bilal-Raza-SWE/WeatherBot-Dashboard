@@ -3,19 +3,18 @@ $(document).ready(function () {
   const geminiApiKey = "AIzaSyCSRfPizXNy1ifW48oR_ieJTYHOBEcGWAI"; // Gemini API key
 
   // Function to handle weather queries using OpenWeather API
-  function handleWeatherQuery(city, isForecast = false) {
-    const apiUrl = isForecast
-      ? `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${weatherApiKey}&units=metric`
-      : `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}&units=metric`;
+  function handleWeatherQuery(city, detailType) {
+    const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${weatherApiKey}&units=metric`;
+    const forecastWeatherUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${weatherApiKey}&units=metric`;
 
     $.ajax({
-      url: apiUrl,
+      url: detailType === "forecast" ? forecastWeatherUrl : currentWeatherUrl,
       method: "GET",
       success: function (data) {
-        if (isForecast) {
+        if (detailType === "forecast") {
           displayWeatherForecastTable(city, data.list);
         } else {
-          displayCurrentWeatherTable(city, data);
+          displayCurrentWeatherDetail(city, data, detailType);
         }
       },
       error: function () {
@@ -26,34 +25,27 @@ $(document).ready(function () {
     });
   }
 
-  // Function to display current weather in table format
-  function displayCurrentWeatherTable(city, data) {
-    let tableHtml = `
-      <table class="chatbot-table">
-        <tbody>
-          <tr>
-            <th>City</th>
-            <td>${city}</td>
-          </tr>
-          <tr>
-            <th>Condition</th>
-            <td>${data.weather[0].description}</td>
-          </tr>
-          <tr>
-            <th>Temp (°C)</th>
-            <td>${data.main.temp}°C</td>
-          </tr>
-          <tr>
-            <th>Humidity</th>
-            <td>${data.main.humidity}%</td>
-          </tr>
-          <tr>
-            <th>Wind Speed</th>
-            <td>${data.wind.speed} m/s</td>
-          </tr>
-        </tbody>
-      </table>`;
-    displayChatbotResponse(tableHtml, true);
+  // Function to display specific current weather detail
+  function displayCurrentWeatherDetail(city, data, detailType) {
+    let response = "";
+    switch (detailType) {
+      case "temperature":
+        response = `The current temperature in ${city} is ${data.main.temp}°C 🌡️.`;
+        break;
+      case "condition":
+        response = `The current weather condition in ${city} is ${data.weather[0].description} ☁️.`;
+        break;
+      case "humidity":
+        response = `The humidity level in ${city} is ${data.main.humidity}% 💧.`;
+        break;
+      case "windspeed":
+        response = `The wind speed in ${city} is ${data.wind.speed} m/s 💨.`;
+        break;
+      default:
+        response = `The current weather in ${city} is ${data.weather[0].description} with a temperature of ${data.main.temp}°C 🌡️.`;
+        break;
+    }
+    displayChatbotResponse(response);
   }
 
   // Function to display 5-day weather forecast in table format
@@ -106,41 +98,63 @@ $(document).ready(function () {
 
   // Function to send a user query to Gemini API
   function sendQueryToGemini(query) {
-    $.ajax({
-      url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
-      method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: `${query}. Please fetch the weather or forecast or 5-day data from OpenWeather API if relevant, and provide the response with both normal text and emojis.`
-              }
-            ]
-          }
-        ]
-      }),
-      success: function (response) {
-        const geminiAnswer =
-          (response?.candidates?.[0]?.content?.parts?.[0]?.text) ||
-          "Sorry, I don't have an answer for that.";
-        
-        // Check for weather-related query inside Gemini's response to determine whether to call the weather API
-        if (query.toLowerCase().includes("weather") || query.toLowerCase().includes("forecast")) {
-          const city = query.split(" ").pop(); // Assuming the last word is the city
-          const isForecast = query.toLowerCase().includes("forecast") || query.toLowerCase().includes("5-day");
-          handleWeatherQuery(city, isForecast);
-        } else {
+    const city = extractCityFromQuery(query);
+    let detailType = "";
+
+    if (query.toLowerCase().includes("temperature")) {
+      detailType = "temperature";
+    } else if (query.toLowerCase().includes("condition")) {
+      detailType = "condition";
+    } else if (query.toLowerCase().includes("humidity")) {
+      detailType = "humidity";
+    } else if (query.toLowerCase().includes("wind speed")) {
+      detailType = "windspeed";
+    } else if (query.toLowerCase().includes("forecast") || query.toLowerCase().includes("5-day")) {
+      detailType = "forecast";
+    } else {
+      // Default to current weather if not specified
+      detailType = "current";
+    }
+
+    // Call OpenWeather API based on user input
+    if (city) {
+      handleWeatherQuery(city, detailType);
+    } else {
+      // Fallback to Gemini API for general queries
+      $.ajax({
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `${query}. Please provide a response with both normal text and emojis.`
+                }
+              ]
+            }
+          ]
+        }),
+        success: function (response) {
+          const geminiAnswer =
+            (response?.candidates?.[0]?.content?.parts?.[0]?.text) ||
+            "Sorry, I don't have an answer for that.";
           displayChatbotResponse(geminiAnswer);
-        }
-      },
-      error: function () {
-        displayChatbotResponse(
-          "Sorry, I could not find an answer for that question."
-        );
-      },
-    });
+        },
+        error: function () {
+          displayChatbotResponse(
+            "Sorry, I could not find an answer for that question."
+          );
+        },
+      });
+    }
+  }
+
+  // Function to extract city name from query
+  function extractCityFromQuery(query) {
+    const words = query.split(" ");
+    return words[words.length - 1]; // Assuming the last word is the city
   }
 
   // Event listener for sending message
